@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增課程</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4caf50;
+        }
+        label {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>新增課程</h1>
+    <form id="addCourseForm">
+        <label for="courseMain">主課程名稱:</label>
+        <input type="text" id="courseMain" name="courseMain" required><br><br>
+
+        <label for="courseSub">子課程名稱:</label>
+        <input type="text" id="courseSub" name="courseSub" required><br><br>
+
+        <label for="courseContext">課程內容:</label>
+        <textarea id="courseContext" name="courseContext" required></textarea><br><br>
+
+        <label for="courseProgress">進度 (例如: 2/10):</label>
+        <input type="text" id="courseProgress" name="courseProgress" required><br><br>
+
+        <button type="submit">新增課程</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addCourseForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const courseData = {
+            courseMain: formData.get('courseMain'),
+            courseSub: formData.get('courseSub'),
+            courseContext: formData.get('courseContext'),
+            courseProgress: formData.get('courseProgress')
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'AddCourse.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    alert('課程新增成功!');
+                    window.location.href = 'index.html'; // Redirect to the course list page
+                } else {
+                    alert('課程新增失敗!');
+                }
+            } else {
+                alert('新增課程時發生錯誤');
+            }
+        };
+
+        xhr.send(JSON.stringify(courseData));
+    });
+</script>
+
+</body>
+</html>

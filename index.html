@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課程管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4caf50;
+        }
+        .course-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .course-item {
+            background-color: #fff;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .course-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        .course-subheader {
+            font-size: 16px;
+            color: #888;
+        }
+        .course-context {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            min-height: 80px;
+            font-size: 14px;
+            color: #555;
+        }
+        .progress-bar-container {
+            margin-top: 15px;
+        }
+        progress {
+            width: 100%;
+            height: 20px;
+        }
+        .progress-text {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        a:hover {
+            background-color: #1e88e5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>課程列表</h1>
+    <ul class="course-list" id="courseList">
+        <!-- 課程項目會動態生成 -->
+    </ul>
+    <a href="Add.html">新增課程</a>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 10px 20px; border-radius: 5px; display: none;">
+    課程資料更新成功
+</div>
+
+<script>
+    // 顯示 Toast
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(function() {
+            toast.style.display = 'none';
+        }, 3000); // 顯示 3 秒後隱藏
+    }
+
+    // 用來顯示課程的函數
+    function renderCourse(course) {
+        const courseList = document.getElementById('courseList');
+        const courseItem = document.createElement('li');
+        courseItem.classList.add('course-item');
+        courseItem.id = `course-${course.courseMain}-${course.courseSub}`; // 加入唯一 ID
+
+        // 計算 completion
+        const progressParts = course.courseProgress.split('/');
+        let completion = 0;
+        if (progressParts.length === 2) {
+            const progress = parseInt(progressParts[0]);
+            const total = parseInt(progressParts[1]);
+            completion = (progress / total) * 100;
+        }
+
+        // 設置課程內容
+        courseItem.innerHTML = `
+            <div class="course-header">${course.courseMain}</div>
+            <div class="course-subheader">${course.courseSub}</div>
+            <div class="course-context">
+                <textarea id="context-${course.courseMain}-${course.courseSub}" rows="4" cols="50">${course.courseContext}</textarea>
+            </div>
+            <div class="progress-bar-container">
+                <input type="text" id="progress-${course.courseMain}-${course.courseSub}" value="${course.courseProgress}" />
+                <progress id="progress-bar-${course.courseMain}-${course.courseSub}" value="${completion.toFixed(2)}" max="100"></progress>
+                <div class="progress-text" id="progress-text-${course.courseMain}-${course.courseSub}">完成度: ${completion.toFixed(2)}%</div>
+                <button onclick="saveCourseData('${course.courseMain}', '${course.courseSub}')">儲存變更</button>
+            </div>
+        `;
+        
+        courseList.appendChild(courseItem);
+    }
+
+    // 儲存課程資料並即時更新進度條
+    function saveCourseData(courseMain, courseSub) {
+        const courseContext = document.getElementById(`context-${courseMain}-${courseSub}`).value;
+        const courseProgress = document.getElementById(`progress-${courseMain}-${courseSub}`).value;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'UpdateCourse.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === "success") {
+                    // 計算新的完成度
+                    const progressParts = courseProgress.split('/');
+                    let completion = 0;
+                    if (progressParts.length === 2) {
+                        const progress = parseInt(progressParts[0]);
+                        const total = parseInt(progressParts[1]);
+                        completion = (progress / total) * 100;
+                    }
+
+                    // 更新進度條
+                    const progressBar = document.getElementById(`progress-bar-${courseMain}-${courseSub}`);
+                    progressBar.value = completion.toFixed(2);
+
+                    // 顯示完成度
+                    const progressText = document.getElementById(`progress-text-${courseMain}-${courseSub}`);
+                    progressText.textContent = `完成度: ${completion.toFixed(2)}%`;
+
+                    // 顯示儲存成功的 Toast
+                    showToast('課程資料更新成功');
+                } else {
+                    alert('更新失敗: ' + response.message);
+                }
+            } else {
+                console.error('無法更新資料');
+            }
+        };
+
+        const data = {
+            courseMain: courseMain,
+            courseSub: courseSub,
+            courseContext: courseContext,
+            courseProgress: courseProgress
+        };
+
+        xhr.send(JSON.stringify(data));
+    }
+
+    // 讀取課程資料並顯示
+    function loadCourseData() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'ReadCourse.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                console.log(data);  // Log data for debugging
+                data.forEach(course => {
+                    renderCourse(course);
+                });
+            } else {
+                console.error('無法加載課程資料');
+            }
+        };
+        xhr.send();
+    }
+
+    // 初始載入
+    loadCourseData();
+</script>
+
+</body>
+</html>
