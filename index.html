@@ -104,6 +104,17 @@
             box-shadow: var(--shadow);
         }
 
+        .masthead-panel::after,
+        .workspace-panel::after,
+        .side-panel::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            pointer-events: none;
+        }
+
         .masthead-panel {
             padding: clamp(24px, 4vw, 40px);
         }
@@ -150,6 +161,27 @@
         .brand {
             display: grid;
             gap: 14px;
+        }
+
+        .brand-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         .brand h1 {
@@ -231,6 +263,10 @@
             border-radius: var(--radius-lg);
             background: rgba(8, 19, 31, 0.72);
             border: 1px solid var(--line);
+        }
+
+        .status-card:first-child {
+            background: linear-gradient(180deg, rgba(15, 32, 49, 0.84), rgba(9, 21, 34, 0.86));
         }
 
         .status-card strong {
@@ -322,6 +358,11 @@
             animation: enter 540ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
+        .course-item:hover {
+            border-color: rgba(124, 240, 200, 0.24);
+            box-shadow: 0 20px 42px rgba(0, 0, 0, 0.28);
+        }
+
         .course-item::after {
             content: "";
             position: absolute;
@@ -358,6 +399,11 @@
             font-size: clamp(22px, 3vw, 30px);
             font-weight: 700;
             letter-spacing: 0.01em;
+        }
+
+        .course-frame {
+            display: grid;
+            gap: 8px;
         }
 
         .progress-chip {
@@ -419,6 +465,10 @@
             display: grid;
             gap: 12px;
             align-content: start;
+            padding: 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(142, 166, 189, 0.14);
+            background: rgba(255, 255, 255, 0.025);
         }
 
         .progress-track {
@@ -498,6 +548,20 @@
             gap: 8px;
         }
 
+        .meta-box:first-child strong {
+            color: var(--accent);
+        }
+
+        .scanline {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, transparent, rgba(124, 240, 200, 0.07), transparent);
+            transform: translateY(-120%);
+            animation: scan 9s linear infinite;
+            opacity: 0.5;
+        }
+
         .meta-box strong {
             font-family: "Oxanium", sans-serif;
             font-size: 24px;
@@ -536,6 +600,15 @@
             }
         }
 
+        @keyframes scan {
+            from {
+                transform: translateY(-120%);
+            }
+            to {
+                transform: translateY(120%);
+            }
+        }
+
         @media (max-width: 980px) {
             .masthead,
             .workspace,
@@ -554,6 +627,14 @@
                 padding-top: 18px;
             }
 
+            .masthead-panel,
+            .workspace-panel,
+            .side-panel,
+            .form-card,
+            .course-item {
+                border-radius: 22px;
+            }
+
             .panel-header,
             .course-topline {
                 flex-direction: column;
@@ -562,6 +643,23 @@
 
             .segmented {
                 width: 100%;
+            }
+
+            .tab-button,
+            .tech-button,
+            .ghost-button,
+            .side-panel button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .toolbar,
+            .action-row {
+                display: grid;
+            }
+
+            .brand h1 {
+                letter-spacing: 0.02em;
             }
         }
 
@@ -580,10 +678,16 @@
     <main class="shell">
         <section class="masthead">
             <article class="masthead-panel">
+                <div class="scanline"></div>
                 <div class="brand">
                     <span class="system-tag">Learning System</span>
                     <h1>UdemyFeng37</h1>
                     <p>課程列表、課程內容、進度更新與新增課程，都維持原本流程，只重做介面呈現。</p>
+                    <div class="brand-meta">
+                        <span class="meta-pill">2026 Interface</span>
+                        <span class="meta-pill">Single Page</span>
+                        <span class="meta-pill">Tech Mode</span>
+                    </div>
                 </div>
                 <div class="toolbar">
                     <button class="tech-button" type="button" onclick="showCourseList()">課程列表</button>
@@ -605,6 +709,7 @@
 
         <section class="workspace">
             <section class="workspace-panel">
+                <div class="scanline"></div>
                 <div class="panel-header">
                     <div>
                         <span class="section-tag">Workspace</span>
@@ -658,6 +763,7 @@
             </section>
 
             <aside class="side-panel">
+                <div class="scanline"></div>
                 <div>
                     <span class="section-tag">Control</span>
                     <h3>Quick Actions</h3>
@@ -739,9 +845,11 @@
 
             courseItem.innerHTML = `
                 <div class="course-topline">
-                    <div class="course-heading">
+                    <div class="course-frame">
+                        <div class="course-heading">
                         <span class="course-subheader">${course.courseSub}</span>
                         <div class="course-header">${course.courseMain}</div>
+                        </div>
                     </div>
                     <div class="progress-chip">${valid ? `${current}/${total}` : course.courseProgress || "N/A"}</div>
                 </div>
